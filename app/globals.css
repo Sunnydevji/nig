@@ -1,26 +1,72 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #F8FAFC;
+  --cardBackground: #FFFFFF;
+  --textPrimary: #0F172A;
+  --textSecondary: #475569;
+  --accent: #2563EB;
+  --border: #E2E8F0;
+  --buttonHover: #1D4ED8;
+  --success: #10B981;
+  --error: #EF4444;
+  --darkBackground: #0F172A;
+  --darkcardBackground: #1E293B;
+  --darktextPrimary: 	#F8FAFC;
+  --darktextSecondary: #CBD5E1;
+  --darkaccent: #3B82F6;
+  --darkborder: #334155;
+  --darkbuttonHover: #2563EB;
+  --darksuccess: #22C55E;
+  --darkerror: #F87171;
 }
+
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-darkBackground: var(--darkBackground);
+  --color-cardBackground: var(--cardBackground);
+  --color-darkcardBackground: var(--darkcardBackground);
+  --color-textPrimary: var(--textPrimary);
+  --color-darktextPrimary: var(--darktextPrimary);
+  --color-textSecondary: var(--textSecondary);
+  --color-darktextSecondary: var(--darktextSecondary);
+  --color-accent: var(--accent);
+  --color-darkaccent: var(--darkaccent);
+  --color-border: var(--border);
+  --color-darkborder: var(--darkborder);
+  --color-buttonHover: var(--buttonHover);
+  --color-darkbuttonHover: var(--darkbuttonHover);
+  --color-success: var(--success);
+  --color-darksuccess: var(--darksuccess);
+  --color-error: var(--error);
+  --color-darkerror: var(--darkerror);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-primary);
+  box-sizing: border-box;
+}
+
+@keyframes fade-in-out {
+  0% { opacity: 0; transform: translateY(-20px) scale(0.95);}
+  10% { opacity: 1; transform: translateY(0) scale(1);}
+  90% { opacity: 1; transform: translateY(0) scale(1);}
+  100% { opacity: 0; transform: translateY(-20px) scale(0.95);}
+}
+.animate-fade-in-out {
+  animation: fade-in-out 2.5s both;
+}
+@keyframes pop {
+  0% { transform: scale(0.7);}
+  60% { transform: scale(1.2);}
+  100% { transform: scale(1);}
+}
+.animate-pop {
+  animation: pop 0.5s;
 }

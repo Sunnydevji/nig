@@ -1,0 +1,153 @@
+{
+  "departments": [
+    {
+      "department_id": "D001",
+      "name": "Executive"
+    },
+    {
+      "department_id": "D002",
+      "name": "Sales"
+    },
+    {
+      "department_id": "D003",
+      "name": "Human Resources"
+    }
+  ],
+  "kpi_definitions": [
+    {
+      "kpi_id": "KPI001",
+      "name": "Strategic Growth",
+      "description": "Measures progress toward company-wide strategic objectives and goals.",
+      "unit": "percentage"
+    },
+    {
+      "kpi_id": "KPI002",
+      "name": "Employee Satisfaction",
+      "description": "Employee happiness and retention metrics based on surveys and feedback.",
+      "unit": "percentage"
+    },
+    {
+      "kpi_id": "KPI003",
+      "name": "Revenue Growth",
+      "description": "Tracks revenue increase over previous periods.",
+      "unit": "percentage"
+    },
+    {
+      "kpi_id": "KPI004",
+      "name": "Innovation Index",
+      "description": "Quantifies innovation based on new initiatives, R&D, and patents.",
+      "unit": "index"
+    },
+    {
+      "kpi_id": "KPI005",
+      "name": "Team Target Achievement",
+      "description": "Percentage of targets achieved by the manager's team.",
+      "unit": "percentage"
+    },
+    {
+      "kpi_id": "KPI006",
+      "name": "Client Acquisition",
+      "description": "Number of new clients acquired within a period.",
+      "unit": "count"
+    },
+    {
+      "kpi_id": "KPI007",
+      "name": "Recruitment Efficiency",
+      "description": "Average time and success rate of hiring processes.",
+      "unit": "percentage"
+    },
+    {
+      "kpi_id": "KPI008",
+      "name": "Training Effectiveness",
+      "description": "Impact of training programs on employee performance.",
+      "unit": "percentage"
+    }
+  ],
+  "employees": [
+    {
+      "employee_id": "E001",
+      "name": "Ananya Sharma",
+      "role": "CEO",
+      "department_id": "D001",
+      "email": "ananya.sharma@company.com",
+      "phone": "+91-9876543210",
+      "manager_id": null,
+      "kpis": [
+        { "kpi_id": "KPI001", "score": 92, "date": "2025-05-01" },
+        { "kpi_id": "KPI002", "score": 88, "date": "2025-05-01" },
+        { "kpi_id": "KPI003", "score": 95, "date": "2025-05-01" },
+        { "kpi_id": "KPI004", "score": 90, "date": "2025-05-01" }
+      ],
+      "performance_summary": "Successfully led strategic growth and innovation, resulting in a 20% YoY revenue increase."
+    },
+    {
+      "employee_id": "E002",
+      "name": "Rajiv Mehta",
+      "role": "Manager",
+      "department_id": "D002",
+      "email": "rajiv.mehta@company.com",
+      "phone": "+91-9876512345",
+      "manager_id": "E001",
+      "kpis": [
+        { "kpi_id": "KPI005", "score": 85, "date": "2025-05-01" },
+        { "kpi_id": "KPI006", "score": 78, "date": "2025-05-01" }
+      ],
+      "performance_summary": "Improved sales pipeline quality and exceeded quarterly team targets."
+    },
+    {
+      "employee_id": "E003",
+      "name": "Sneha Kapoor",
+      "role": "Manager",
+      "department_id": "D003",
+      "email": "sneha.kapoor@company.com",
+      "phone": "+91-9876509876",
+      "manager_id": "E001",
+      "kpis": [
+        { "kpi_id": "KPI007", "score": 90, "date": "2025-05-01" },
+        { "kpi_id": "KPI008", "score": 88, "date": "2025-05-01" }
+      ],
+      "performance_summary": "Reduced average hiring time by 30% and increased training ROI."
+    },
+    {
+      "employee_id": "E004",
+      "name": "Arjun Verma",
+      "role": "Team Leader",
+      "department_id": "D002",
+      "email": "arjun.verma@company.com",
+      "phone": "+91-9876523456",
+      "manager_id": "E002",
+      "kpis": [
+        { "kpi_id": "KPI005", "score": 82, "date": "2025-05-01" },
+        { "kpi_id": "KPI006", "score": 75, "date": "2025-05-01" }
+      ],
+      "performance_summary": "Managed team effectively, achieving high performance with improved lead conversion."
+    },
+    {
+      "employee_id": "E005",
+      "name": "Neha Reddy",
+      "role": "Employee",
+      "department_id": "D002",
+      "email": "neha.reddy@company.com",
+      "phone": "+91-9876532109",
+      "manager_id": "E004",
+      "kpis": [
+        { "kpi_id": "KPI006", "score": 78, "date": "2025-05-01" }
+      ],
+      "performance_summary": "Consistent top performer with strong focus on client satisfaction and deadline management."
+    },
+    {
+      "employee_id": "E006",
+      "name": "Aman Joshi",
+      "role": "Employee",
+      "department_id": "D003",
+      "email": "aman.joshi@company.com",
+      "phone": "+91-9876547890",
+      "manager_id": "E003",
+      "kpis": [
+        { "kpi_id": "KPI007", "score": 85, "date": "2025-05-01" },
+        { "kpi_id": "KPI008", "score": 90, "date": "2025-05-01" }
+      ],
+      "performance_summary": "Delivered outstanding onboarding experience and supported documentation processes efficiently."
+    }
+  ]
+}
