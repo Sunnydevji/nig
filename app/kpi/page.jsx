@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -11,6 +11,10 @@ import {
   Legend,
 } from "chart.js";
 import { FaRegEye, FaRegCommentDots } from "react-icons/fa";
+import { useAuthStore } from "../store/useAuthStore";
+import { fetchEmployeeKPIs, fetchTeamKPIs, submitKPI, scoreKPI, finalizeKPI, fetchPreviousEmployeeKPIs } from "../services/kpi";
+import RequireAuth from "@/components/RequireAuth";
+import Notification from "@/components/Notification";
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -43,35 +47,6 @@ const previousKPIs = [
   },
 ];
 
-const teamKPIs = [
-  ...previousKPIs,
-  {
-    id: 3,
-    employee: "Alice Johnson",
-    measure: "Improve onboarding",
-    target: "Complete within 7 days",
-    startTime: "2024-03-01",
-    endTime: "2024-06-01",
-    employeeScore: 92,
-    managerScore: 95,
-    comments: "Streamlined the process.",
-    managerComments: "Outstanding efficiency.",
-  },
-  // Add more mock employees for demonstration
-  ...Array.from({ length: 12 }).map((_, i) => ({
-    id: 4 + i,
-    employee: `Employee ${i + 1}`,
-    measure: "Sample Objective",
-    target: "Target",
-    startTime: "2024-01-01",
-    endTime: "2024-12-31",
-    employeeScore: Math.floor(Math.random() * 40) + 60,
-    managerScore: Math.floor(Math.random() * 40) + 60,
-    comments: "Sample comment",
-    managerComments: "Sample manager comment",
-  })),
-];
-
 const initialKPI = {
   measure: "",
   target: "",
@@ -85,12 +60,91 @@ const initialKPI = {
 const avg = (arr) => (arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0);
 
 export default function KPIRoleDashboard() {
-  const [role, setRole] = useState("employee"); // "employee" or "manager"
+  const user = useAuthStore((state) => state.user);
+  const [role, setRole] = useState(user?.role?.toLowerCase());
   const [kpi, setKpi] = useState(initialKPI);
   const [activeTab, setActiveTab] = useState("new");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedKPI, setSelectedKPI] = useState(null);
   const [search, setSearch] = useState("");
+  const [employeeKPIs, setEmployeeKPIs] = useState([]);
+  const [previousKPIs, setPreviousKPIs] = useState([]);
+  const [teamKPIs, setTeamKPIs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState(null);
+  
+
+  // Fetch KPIs on mount or role change
+useEffect(() => {
+  if (role === "employee") {
+    fetchPreviousEmployeeKPIs().then(data => setPreviousKPIs(data.kpis || []));
+  }
+}, [role]);
+
+  useEffect(() => {
+    setLoading(true);
+    if (role === "employee") {
+      fetchEmployeeKPIs().then(data => {
+        setEmployeeKPIs(data.kpis || []);
+        setLoading(false);
+      });
+    } else {
+      fetchTeamKPIs().then(data => {
+        setTeamKPIs(data.kpis || []);
+        setLoading(false);
+      });
+    }
+  }, [role]);
+
+  // Submit new KPI
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    const payload = {
+      measure: kpi.measure,
+      target: kpi.target,
+      start_date: kpi.startTime,
+      end_date: kpi.endTime,
+      employee_score: kpi.employeeScore,
+      employee_comments: kpi.comments,
+    };
+    const res = await submitKPI(payload);
+    if (res.success) {
+      setNotification({type: "success", message:"KPI Submitted!"});
+      setKpi(initialKPI);
+      // Refresh list
+      fetchEmployeeKPIs().then(data => setEmployeeKPIs(data.kpis || []));
+    } else {
+      setNotification({ type: "error", message: res.msg || "Error submitting KPI" });
+    }
+    setLoading(false);
+  };
+
+  // Manager scores a KPI
+  const handleScore = async (id, score, comments) => {
+    setLoading(true);
+    const res = await scoreKPI(id, { manager_score: score, manager_comments: comments });
+    if (res.success) {
+      setNotification({type: "success", message: "KPI scored!"});
+      fetchTeamKPIs().then(data => setTeamKPIs(data.kpis || []));
+    } else {
+      setNotification({type: "error",message: res.msg || "Error scoring KPI"});
+    }
+    setLoading(false);
+  };
+
+  // Manager finalizes a KPI
+  const handleFinalize = async (id) => {
+    setLoading(true);
+    const res = await finalizeKPI(id);
+    if (res.success) {
+      setNotification({type: "success", message: "KPI finalized and email sent!"});
+      fetchTeamKPIs().then(data => setTeamKPIs(data.kpis || []));
+    } else {
+      setNotification({type: "error", message: res.msg || "Error finalizing KPI"});
+    }
+    setLoading(false);
+  };
 
   // Chart Data
   const employeeChartData = {
@@ -167,12 +221,6 @@ export default function KPIRoleDashboard() {
     setKpi((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    alert("KPI Submitted:\n" + JSON.stringify(kpi, null, 2));
-    setKpi(initialKPI);
-  };
-
   // Filtered KPIs for manager table
   const filteredTeamKPIs = teamKPIs.filter(
     (kpi) =>
@@ -182,9 +230,17 @@ export default function KPIRoleDashboard() {
 
   // --- UI ---
   return (
+    <RequireAuth>
+      {notification && (
+  <Notification
+    type={notification.type}
+    message={notification.message}
+    onClose={() => setNotification(null)}
+  />
+)}
     <div className="max-w-7xl mx-auto p-6">
       {/* Role Switcher */}
-      <div className="flex items-center gap-4 mb-8">
+      {/* <div className="flex items-center gap-4 mb-8">
         <span className="font-semibold text-textSecondary dark:text-darktextSecondary">View as:</span>
         <select
           value={role}
@@ -194,7 +250,7 @@ export default function KPIRoleDashboard() {
           <option value="employee">Employee</option>
           <option value="manager">Manager</option>
         </select>
-      </div>
+      </div> */}
 
       {/* Employee Dashboard */}
       {role === "employee" && (
@@ -205,21 +261,19 @@ export default function KPIRoleDashboard() {
           {/* Tabs */}
           <div className="flex gap-2 mb-6 border-b border-border dark:border-darkborder">
             <button
-              className={`px-4 py-2 font-semibold rounded-t ${
-                activeTab === "new"
+              className={`px-4 py-2 font-semibold rounded-t ${activeTab === "new"
                   ? "bg-accent text-white"
                   : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
-              }`}
+                }`}
               onClick={() => setActiveTab("new")}
             >
               New Objective
             </button>
             <button
-              className={`px-4 py-2 font-semibold rounded-t ${
-                activeTab === "previous"
+              className={`px-4 py-2 font-semibold rounded-t ${activeTab === "previous"
                   ? "bg-accent text-white"
                   : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
-              }`}
+                }`}
               onClick={() => setActiveTab("previous")}
             >
               Previous KPI Scores
@@ -295,7 +349,7 @@ export default function KPIRoleDashboard() {
                       placeholder="0-100"
                     />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 ">
                     <label className="font-medium text-textSecondary dark:text-darktextSecondary">Manager Score</label>
                     <input
                       type="number"
@@ -304,8 +358,9 @@ export default function KPIRoleDashboard() {
                       onChange={handleChange}
                       min="0"
                       max="100"
-                      className="w-full mt-1 p-2 placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded"
+                      className="w-full mt-1 p-2 disabled:cursor-not-allowed placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded"
                       placeholder="0-100"
+                      disabled={role === "employee"}
                     />
                   </div>
                 </div>
@@ -393,7 +448,7 @@ export default function KPIRoleDashboard() {
             </div>
           </div>
           {/* Chart */}
-          <div className="bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow mb-8 overflow-x-auto" style={{maxHeight: 500}}>
+          <div className="bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow mb-8 overflow-x-auto" style={{ maxHeight: 500 }}>
             <div style={{ minWidth: Math.max(600, teamKPIs.length * 60) }}>
               <Bar data={managerChartData} options={{ ...chartOptions, indexAxis: "y" }} />
             </div>
@@ -410,7 +465,7 @@ export default function KPIRoleDashboard() {
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Search employee or objective..."
                 className="border border-border dark:border-darkborder rounded px-3 py-1 bg-background dark:bg-darkBackground text-textPrimary dark:text-darktextPrimary"
-                style={{maxWidth: 260}}
+                style={{ maxWidth: 260 }}
               />
             </div>
             <div className="overflow-x-auto">
@@ -445,24 +500,22 @@ export default function KPIRoleDashboard() {
                         </button>
                         <button
                           className="p-2 rounded hover:bg-accent/20 dark:hover:bg-darkaccent/20 transition"
-                          title="Manager Comments"
-                          onClick={() => openModal(kpi)}
+                          title="Score KPI"
+                          onClick={() => {
+                            const score = prompt("Enter manager score:");
+                            const comments = prompt("Enter manager comments:");
+                            if (score) handleScore(kpi.id, score, comments);
+                          }}
                         >
                           <FaRegCommentDots className="text-accent dark:text-darkaccent text-lg" />
                         </button>
-                        <a
-                          href={`mailto:${kpi.employeeEmail || "employee@example.com"}?subject=KPI Discussion: ${encodeURIComponent(
-                            kpi.measure
-                          )}&body=${encodeURIComponent(
-                            `Hello ${kpi.employee},\n\nI would like to schedule a discussion regarding your KPI:\n\nObjective: ${kpi.measure}\nTarget: ${kpi.target}\nPeriod: ${kpi.startTime} to ${kpi.endTime}\n\nPlease let me know your availability for a meeting on ${new Date().toISOString().slice(0, 10)}.\n\nBest regards,\n[Manager Name]`
-                          )}`}
+                        <button
                           className="p-2 rounded hover:bg-accent/20 dark:hover:bg-darkaccent/20 transition"
-                          title="Schedule KPI Discussion"
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          title="Finalize KPI"
+                          onClick={() => handleFinalize(kpi.id)}
                         >
-                          <span className="text-accent dark:text-darkaccent text-lg font-bold">📧</span>
-                        </a>
+                          <span className="text-accent dark:text-darkaccent text-lg font-bold">✔️</span>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -519,5 +572,6 @@ export default function KPIRoleDashboard() {
         </div>
       )}
     </div>
+    </RequireAuth>
   );
 }

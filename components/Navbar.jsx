@@ -1,8 +1,13 @@
 import React from "react";
 import ToggleDark from "../app/utils/toogleDark";
 import { FaUserCircle } from "react-icons/fa";
+  import { useAuthStore } from "../app/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 export function Navbar({ user }) {
+  const logout = useAuthStore((state) => state.logout);
+  const router = useRouter();
+
   return (
     <nav className="w-full flex items-center justify-between px-6 py-3 bg-cardBackground dark:bg-darkcardBackground shadow border-b border-border dark:border-darkborder transition-colors z-40">
       {/* Logo & Title */}
@@ -22,14 +27,14 @@ export function Navbar({ user }) {
         <div className="flex items-center gap-2">
           <FaUserCircle className="text-2xl text-accent dark:text-darkaccent" />
           <span className="font-medium text-textPrimary dark:text-darktextPrimary">
-            {user.name}
+            {user?.name}
           </span>
         </div>
       </div>
       <button
         onClick={() => {
           logout();
-          router.push("/auth");
+          router.replace("/auth");
         }}
         className="ml-4 px-3 py-1 rounded bg-error dark:bg-darkerror text-textPrimary dark:text-darktextPrimary transition"
       >

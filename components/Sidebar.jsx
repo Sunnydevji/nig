@@ -1,18 +1,22 @@
 import React from "react";
 import { FaHome, FaUsers, FaChartBar, FaCog } from "react-icons/fa";
 
-export function Sidebar({ links = [] }) {
-  // Example default links if none provided
-  const defaultLinks = [
-    { label: "Dashboard", href: "/dashboard", icon: <FaHome /> },
-    { label: "Employees", href: "/employees", icon: <FaUsers /> },
-    { label: "KPIs", href: "/kpi", icon: <FaChartBar /> },
-    { label: "Settings", href: "/settings", icon: <FaCog /> },
+export function Sidebar({ user }) {
+  // Define all possible links with allowed roles
+  const allLinks = [
+    { label: "Dashboard", href: "/dashboard", icon: <FaHome />, roles: ["CEO", "Manager", "Team Leader", "Employee"] },
+    { label: "Employees", href: "/employees", icon: <FaUsers />, roles: ["CEO", "Manager"] },
+    { label: "KPIs", href: "/kpi", icon: <FaChartBar />, roles: ["CEO", "Manager", "Team Leader","Employee"] },
+    { label: "Settings", href: "/settings", icon: <FaCog />, roles: ["CEO"] },
   ];
-  const navLinks = links.length ? links : defaultLinks;
+
+  // Filter links based on user role
+  const navLinks = user
+    ? allLinks.filter(link => link.roles.includes(user.role))
+    : [];
 
   return (
-    <aside className=" h-screen w-64 bg-cardBackground dark:bg-darkcardBackground shadow-lg border-r border-border dark:border-darkborder flex flex-col py-6 px-4 transition-colors">
+    <aside className="h-screen w-64 bg-cardBackground dark:bg-darkcardBackground shadow-lg border-r border-border dark:border-darkborder flex flex-col py-6 px-4 transition-colors">
       {/* Sidebar Title */}
       <div className="flex items-center gap-2 mb-8">
         <img

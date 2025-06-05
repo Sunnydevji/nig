@@ -5,6 +5,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import Notification from "../../components/Notification";
 import { Button } from "../../components/Button";
 import { registerUser, verifyOtp, loginUser } from "../services/authClient";
+import { fetchManagers } from "../services/employee";
 import ToggleDark from "../utils/toogleDark";
 
 const logoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"; // Replace with your logo
@@ -236,30 +237,18 @@ function LoginForm({ onSwitch, setNotification, handleLogin, loading, credential
 function RegisterForm({ onSwitch, setNotification, handleRegister, handleVerifyOtp, loading, step, setStep, credentials, setCredentials, otp, setOtp, form, setForm }) {
   // Example options (replace with API data if needed)
   const roles = ["CEO", "Manager", "Team Leader", "Employee"];
+  const [managers, setManagers] = useState([]);
+  const showManager = form.role === "Employee";
   const departments = [
     { id: "D001", name: "Executive" },
     { id: "D002", name: "Sales" },
     { id: "D003", name: "HR" },
     { id: "D004", name: "IT" },
   ];
-  const managers = [
-    { id: "E001", name: "Ananya Sharma" },
-    { id: "E002", name: "Rajiv Mehta" },
-    // ...add more managers
-  ];
 
-  // const [form, setform] = useState({
-  //   name: "",
-  //   role: "",
-  //   department_id: "",
-  //   email: "",
-  //   phone: "",
-  //   password: "",
-  //   manager_id: "",
-  // });
-
-  // Show manager_id only if role is Employee
-  const showManager = form.role === "Employee";
+    useEffect(() => {
+    fetchManagers().then(data => setManagers(data.managers || []));
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;

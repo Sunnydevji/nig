@@ -13,7 +13,7 @@ export default function LayoutClientWrapper({ children }) {
 
   return (
     <div className="flex min-h-screen bg-background dark:bg-darkBackground">
-      <Sidebar />
+      <Sidebar user={user}/>
       <div className="flex-1 flex flex-col h-screen">
         <Navbar user={user} /> {/* pass user as prop */}
         <main className="flex-1 overflow-auto p-6">{children}</main>
