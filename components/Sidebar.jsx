@@ -1,12 +1,15 @@
 import React from "react";
-import { FaHome, FaUsers, FaChartBar, FaCog } from "react-icons/fa";
+import { FaHome, FaUsers, FaChartBar, FaCog, FaTasks, FaUserCircle, FaClipboardCheck } from "react-icons/fa";
 
 export function Sidebar({ user }) {
   // Define all possible links with allowed roles
   const allLinks = [
     { label: "Dashboard", href: "/dashboard", icon: <FaHome />, roles: ["CEO", "Manager", "Team Leader", "Employee"] },
     { label: "Employees", href: "/employees", icon: <FaUsers />, roles: ["CEO", "Manager"] },
-    { label: "KPIs", href: "/kpi", icon: <FaChartBar />, roles: ["CEO", "Manager", "Team Leader","Employee"] },
+    { label: "KPIs", href: "/kpi", icon: <FaChartBar />, roles: ["CEO", "Manager", "Team Leader", "Employee"] },
+    { label: "Tasks", href: "/tasks", icon: <FaTasks />, roles: ["CEO", "Manager", "Team Leader", "Employee"] },
+    { label: "Profile", href: "/profile", icon: <FaUserCircle />, roles: ["CEO", "Manager", "Team Leader", "Employee"] },
+    { label: "Review Requests", href: "/reviews", icon: <FaClipboardCheck />, roles: ["CEO", "Manager"] },
     { label: "Settings", href: "/settings", icon: <FaCog />, roles: ["CEO"] },
   ];
 
