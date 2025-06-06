@@ -90,10 +90,11 @@ export default function KPIRoleDashboard() {
   const user = useAuthStore((state) => state.user);
   const [role, setRole] = useState(user?.role?.toLowerCase() || "employee");
   const [kpi, setKpi] = useState(initialKPI);
-  const [activeTab, setActiveTab] = useState("new");
+  const [activeTab, setActiveTab] = useState("add"); // stages: add, score, send
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedKPI, setSelectedKPI] = useState(null);
   const [search, setSearch] = useState("");
+  const [showTabs, setShowTabs] = useState(false); // <-- Add this state
   // --- Use mock data for now ---
   const [employeeKPIs, setEmployeeKPIs] = useState(MOCK_PREVIOUS_KPIS);
   const [previousKPIs, setPreviousKPIs] = useState(MOCK_PREVIOUS_KPIS);
@@ -260,85 +261,138 @@ export default function KPIRoleDashboard() {
             <h2 className="text-3xl font-bold mb-8 text-textPrimary dark:text-darktextPrimary">
               Individual KPI (SMART Goal)
             </h2>
-            {/* Tabs */}
-            <div className="flex gap-2 mb-6 border-b border-border dark:border-darkborder">
+            {/* Show "Add New Objective" button if not in tab flow */}
+            {!showTabs && (
               <button
-                className={`px-4 py-2 font-semibold rounded-t ${activeTab === "new"
-                    ? "bg-accent text-white"
-                    : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
-                  }`}
-                onClick={() => setActiveTab("new")}
+                className="mb-8 bg-accent dark:bg-darkaccent hover:bg-buttonHover dark:hover:bg-darkbuttonHover text-white px-6 py-2 rounded font-semibold text-lg transition"
+                onClick={() => {
+                  setShowTabs(true);
+                  setActiveTab("add");
+                }}
               >
-                New Objective
+                + Add New Objective
               </button>
-              <button
-                className={`px-4 py-2 font-semibold rounded-t ${activeTab === "previous"
-                    ? "bg-accent text-white"
-                    : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
-                  }`}
-                onClick={() => setActiveTab("previous")}
-              >
-                Previous KPI Scores
-              </button>
-            </div>
-            {/* Tab Content */}
-            {activeTab === "new" && (
-              <div className="flex flex-col md:flex-row gap-8 items-start">
-                {/* KPI Form */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="flex-1 bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow"
-                >
-                  <div className="mb-4">
-                    <label className="font-medium text-textSecondary dark:text-darktextSecondary">Measure</label>
-                    <input
-                      type="text"
-                      name="measure"
-                      value={kpi.measure}
-                      onChange={handleChange}
-                      required
-                      className="w-full mt-1 p-2 placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded focus:outline-accent"
-                      placeholder="e.g. Increase sales"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="font-medium text-textSecondary dark:text-darktextSecondary">Target</label>
-                    <input
-                      type="text"
-                      name="target"
-                      value={kpi.target}
-                      onChange={handleChange}
-                      required
-                      className="w-full mt-1 p-2 placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded focus:outline-accent"
-                      placeholder="e.g. 20% growth"
-                    />
-                  </div>
-                  <div className="flex gap-4 mb-4">
-                    <div className="flex-1">
-                      <label className="font-medium text-textSecondary dark:text-darktextSecondary">Start Time</label>
+            )}
+            {/* Show tabs only when adding new objective */}
+            {showTabs && (
+              <>
+                <div className="flex gap-2 mb-6 border-b border-border dark:border-darkborder">
+                  <button
+                    className={`px-4 py-2 font-semibold rounded-t ${activeTab === "add"
+                      ? "bg-accent text-white"
+                      : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
+                      }`}
+                    onClick={() => setActiveTab("add")}
+                  >
+                    1. Add Objective
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-semibold rounded-t ${activeTab === "score"
+                      ? "bg-accent text-white"
+                      : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
+                      }`}
+                    onClick={() => setActiveTab("score")}
+                    disabled={activeTab === "add"}
+                  >
+                    2. Score Yourself
+                  </button>
+                  <button
+                    className={`px-4 py-2 font-semibold rounded-t ${activeTab === "send"
+                      ? "bg-accent text-white"
+                      : "bg-cardBackground dark:bg-darkcardBackground text-textPrimary dark:text-darktextPrimary"
+                      }`}
+                    onClick={() => setActiveTab("send")}
+                    disabled={activeTab === "add" || activeTab === "score"}
+                  >
+                    3. Send to Manager
+                  </button>
+                  <button
+                    className="ml-auto px-3 py-2 text-xs text-error dark:text-darkerror"
+                    onClick={() => {
+                      setShowTabs(false);
+                      setActiveTab("add");
+                      setKpi(initialKPI);
+                    }}
+                    type="button"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                {/* Tab Content */}
+                {activeTab === "add" && (
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      setActiveTab("score");
+                    }}
+                    className="bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow max-w-xl"
+                  >
+                    <div className="mb-4">
+                      <label className="font-medium text-textSecondary dark:text-darktextSecondary">Measure</label>
                       <input
-                        type="date"
-                        name="startTime"
-                        value={kpi.startTime}
+                        type="text"
+                        name="measure"
+                        value={kpi.measure}
                         onChange={handleChange}
                         required
-                        className="w-full mt-1 p-2 text-textSecondary dark:text-textSecondary border border-border dark:border-darkborder rounded"
+                        className="w-full mt-1 p-2 border border-border dark:border-darkborder rounded"
+                        placeholder="e.g. Increase sales"
                       />
                     </div>
-                    <div className="flex-1">
-                      <label className="font-medium text-textSecondary dark:text-darktextSecondary">End Time</label>
+                    <div className="mb-4">
+                      <label className="font-medium text-textSecondary dark:text-darktextSecondary">Target</label>
                       <input
-                        type="date"
-                        name="endTime"
-                        value={kpi.endTime}
+                        type="text"
+                        name="target"
+                        value={kpi.target}
                         onChange={handleChange}
                         required
-                        className="w-full mt-1 p-2 dark:text-textSecondary text-textSecondary border border-border dark:border-darkborder rounded"
+                        className="w-full mt-1 p-2 border border-border dark:border-darkborder rounded"
+                        placeholder="e.g. 20% growth"
                       />
                     </div>
-                  </div>
-                  <div className="flex gap-4 mb-4">
-                    <div className="flex-1">
+                    <div className="flex gap-4 mb-4">
+                      <div className="flex-1">
+                        <label className="font-medium text-textSecondary dark:text-darktextSecondary">Start Time</label>
+                        <input
+                          type="date"
+                          name="startTime"
+                          value={kpi.startTime}
+                          onChange={handleChange}
+                          required
+                          className="w-full mt-1 p-2 border border-border dark:border-darkborder rounded"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="font-medium text-textSecondary dark:text-darktextSecondary">End Time</label>
+                        <input
+                          type="date"
+                          name="endTime"
+                          value={kpi.endTime}
+                          onChange={handleChange}
+                          required
+                          className="w-full mt-1 p-2 border border-border dark:border-darkborder rounded"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="submit"
+                      className="mt-2 bg-accent dark:bg-darkaccent hover:bg-buttonHover dark:hover:bg-darkbuttonHover text-white px-6 py-2 rounded font-semibold text-lg transition"
+                    >
+                      Next: Score Yourself
+                    </button>
+                  </form>
+                )}
+
+                {activeTab === "score" && (
+                  <form
+                    onSubmit={e => {
+                      e.preventDefault();
+                      setActiveTab("send");
+                    }}
+                    className="bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow max-w-xl"
+                  >
+                    <div className="mb-4">
                       <label className="font-medium text-textSecondary dark:text-darktextSecondary">Employee Score</label>
                       <input
                         type="number"
@@ -347,80 +401,84 @@ export default function KPIRoleDashboard() {
                         onChange={handleChange}
                         min="0"
                         max="100"
-                        className="w-full mt-1 p-2 placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded"
+                        required
+                        className="w-full mt-1 p-2 border border-border dark:border-darkborder rounded"
                         placeholder="0-100"
                       />
                     </div>
-                    <div className="flex-1 ">
-                      <label className="font-medium text-textSecondary dark:text-darktextSecondary">Manager Score</label>
-                      <input
-                        type="number"
-                        name="managerScore"
-                        value={kpi.managerScore}
+                    <div className="mb-4">
+                      <label className="font-medium text-textSecondary dark:text-darktextSecondary">Comments</label>
+                      <textarea
+                        name="comments"
+                        value={kpi.comments}
                         onChange={handleChange}
-                        min="0"
-                        max="100"
-                        className="w-full mt-1 p-2 disabled:cursor-not-allowed placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded"
-                        placeholder="0-100"
-                        disabled={role === "employee"}
+                        rows={3}
+                        className="w-full mt-1 p-2 border border-border dark:border-darkborder rounded resize-vertical"
+                        placeholder="Add any comments..."
                       />
                     </div>
+                    <button
+                      type="submit"
+                      className="mt-2 bg-accent dark:bg-darkaccent hover:bg-buttonHover dark:hover:bg-darkbuttonHover text-white px-6 py-2 rounded font-semibold text-lg transition"
+                    >
+                      Next: Send to Manager
+                    </button>
+                  </form>
+                )}
+
+                {activeTab === "send" && (
+                  <div className="bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow max-w-xl">
+                    <h3 className="text-xl font-semibold mb-4 text-textSecondary dark:text-darktextSecondary">
+                      Review &amp; Send to Manager
+                    </h3>
+                    <div className="mb-2"><b>Measure:</b> {kpi.measure}</div>
+                    <div className="mb-2"><b>Target:</b> {kpi.target}</div>
+                    <div className="mb-2"><b>Period:</b> {kpi.startTime} to {kpi.endTime}</div>
+                    <div className="mb-2"><b>Employee Score:</b> {kpi.employeeScore}</div>
+                    <div className="mb-2"><b>Comments:</b> {kpi.comments}</div>
+                    <button
+                      className="mt-4 bg-accent dark:bg-darkaccent hover:bg-buttonHover dark:hover:bg-darkbuttonHover text-white px-6 py-2 rounded font-semibold text-lg transition"
+                      onClick={() => {
+                        setNotification({ type: "success", message: "KPI sent to manager! (mock)" });
+                        setShowTabs(false);
+                        setActiveTab("add");
+                        setKpi(initialKPI);
+                      }}
+                    >
+                      Send to Manager
+                    </button>
                   </div>
-                  <div className="mb-4">
-                    <label className="font-medium text-textSecondary dark:text-darktextSecondary">Comments</label>
-                    <textarea
-                      name="comments"
-                      value={kpi.comments}
-                      onChange={handleChange}
-                      rows={3}
-                      className="w-full mt-1 p-2 placeholder:text-textSecondary dark:placeholder:text-textSecondary border border-border dark:border-darkborder rounded resize-vertical"
-                      placeholder="Add any comments..."
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="mt-2 bg-accent dark:bg-darkaccent hover:bg-buttonHover dark:hover:bg-darkbuttonHover text-white px-6 py-2 rounded font-semibold text-lg transition"
-                  >
-                    Submit KPI
-                  </button>
-                </form>
-                {/* Chart */}
-                <div className="flex-1 bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow min-w-[320px]">
-                  <h3 className="text-xl font-semibold mb-4 text-textSecondary dark:text-darktextSecondary">
-                    Previous KPI Scores
-                  </h3>
-                  <Bar data={employeeChartData} options={chartOptions} />
-                </div>
-              </div>
+                )}
+              </>
             )}
 
-            {activeTab === "previous" && (
-              <div className="bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow">
-                <h3 className="text-xl font-semibold mb-4 text-textSecondary dark:text-darktextSecondary">
-                  Previous KPI Scores
-                </h3>
-                <ul className="space-y-4">
-                  {previousKPIs.map((item) => (
-                    <li
-                      key={item.id}
-                      className="border-b border-border dark:border-darkborder pb-3 cursor-pointer hover:bg-accent/10 dark:hover:bg-darkaccent/10 rounded transition"
-                      onClick={() => openModal(item)}
-                    >
-                      <div className="font-medium text-accent dark:text-darkaccent">{item.measure}</div>
-                      <div className="text-sm text-textSecondary dark:text-darktextSecondary">
-                        Target: <b>{item.target}</b>
-                      </div>
-                      <div className="text-xs text-textSecondary dark:text-darktextSecondary">
-                        Period: {item.startTime} to {item.endTime}
-                      </div>
-                      <div className="text-xs text-success dark:text-darksuccess">
-                        Employee Score: <b>{item.employeeScore}</b> | Manager Score: <b>{item.managerScore}</b>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+            {/* Chart and previous KPIs */}
+            <div className="mt-10 bg-cardBackground dark:bg-darkcardBackground border border-border dark:border-darkborder rounded-xl p-6 shadow min-w-[320px]">
+              <h3 className="text-xl font-semibold mb-4 text-textSecondary dark:text-darktextSecondary">
+                Previous KPI Scores
+              </h3>
+              <Bar data={employeeChartData} options={chartOptions} />
+              <ul className="space-y-4 mt-6">
+                {previousKPIs.map((item) => (
+                  <li
+                    key={item.id}
+                    className="border-b border-border dark:border-darkborder pb-3 cursor-pointer hover:bg-accent/10 dark:hover:bg-darkaccent/10 rounded transition"
+                    onClick={() => openModal(item)}
+                  >
+                    <div className="font-medium text-accent dark:text-darkaccent">{item.measure}</div>
+                    <div className="text-sm text-textSecondary dark:text-darktextSecondary">
+                      Target: <b>{item.target}</b>
+                    </div>
+                    <div className="text-xs text-textSecondary dark:text-darktextSecondary">
+                      Period: {item.startTime} to {item.endTime}
+                    </div>
+                    <div className="text-xs text-success dark:text-darksuccess">
+                      Employee Score: <b>{item.employeeScore}</b> | Manager Score: <b>{item.managerScore}</b>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </>
         )}
 
