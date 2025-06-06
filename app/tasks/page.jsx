@@ -66,7 +66,7 @@ export default function TasksPage() {
                 </div>
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">
-                <span
+                {/* <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
                     task.status === "Completed"
                       ? "bg-success/10 text-success dark:bg-darksuccess/10 dark:text-darksuccess"
@@ -74,7 +74,7 @@ export default function TasksPage() {
                   }`}
                 >
                   {task.status}
-                </span>
+                </span> */}
                 <button
                   className="ml-2 px-3 py-1 rounded bg-accent dark:bg-darkaccent text-white font-medium hover:bg-buttonHover dark:hover:bg-darkbuttonHover transition"
                   onClick={() => setSelectedTask(task)}
@@ -97,9 +97,9 @@ export default function TasksPage() {
                 &times;
               </button>
               <h3 className="text-2xl font-bold mb-2 text-accent dark:text-darkaccent">{selectedTask.title}</h3>
-              <div className="mb-2 text-textSecondary dark:text-darktextSecondary">
+              {/* <div className="mb-2 text-textSecondary dark:text-darktextSecondary">
                 <b>Status:</b> {selectedTask.status}
-              </div>
+              </div> */}
               <div className="mb-2 text-textSecondary dark:text-darktextSecondary">
                 <b>Due Date:</b> {selectedTask.due}
               </div>
