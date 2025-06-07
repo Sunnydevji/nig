@@ -23,7 +23,7 @@ export function Navbar({ user }) {
       </div>
       {/* User Info & Theme Toggle */}
       <div className="flex items-center gap-4">
-        <ToggleDark />
+        {/* <ToggleDark /> */}
         <div className="flex items-center gap-2">
           <FaUserCircle className="text-2xl text-accent dark:text-darkaccent" />
           <span className="font-medium text-textPrimary dark:text-darktextPrimary">

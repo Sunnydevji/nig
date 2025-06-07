@@ -79,7 +79,7 @@ export function Sidebar({ user }) {
       dropdown: [
         { label: "Individual KPI", href: "/kpi/individual" },
         { label: "Morals KPI", href: "/kpi/morals" },
-        // { label: "Performance Rating", href: "/kpi/performance-rating" },
+        { label: "Performance Rating", href: "/kpi/performance-rating" },
         { label: "Report", href: "/kpi/report" },
       ],
     },
