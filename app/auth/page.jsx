@@ -4,10 +4,35 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "../store/useAuthStore";
 import Notification from "../../components/Notification";
 import { Button } from "../../components/Button";
-import { registerUser, verifyOtp, loginUser } from "../services/authClient";
+// import { registerUser, verifyOtp, loginUser } from "../services/authClient";
+// import { fetchManagers } from "../services/employee";
 import ToggleDark from "../utils/toogleDark";
 
 const logoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"; // Replace with your logo
+
+// --- TEMP DATA FOR DEMO LOGIN ---
+const TEMP_USERS = [
+  {
+    name: "Alice Johnson",
+    email: "alice@company.com",
+    password: "password123",
+    role: "Employee",
+    department: "Sales",
+    manager: "Bob Smith",
+    phone: "123-456-7890",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+  },
+  {
+    name: "Bob Smith",
+    email: "bob@company.com",
+    password: "managerpass",
+    role: "Manager",
+    department: "Sales",
+    manager: "CEO",
+    phone: "555-555-5555",
+    image: "https://randomuser.me/api/portraits/men/32.jpg",
+  },
+];
 
 export default function AuthPage() {
   const [showLogin, setShowLogin] = useState(true);
@@ -29,31 +54,20 @@ export default function AuthPage() {
   const login = useAuthStore((state) => state.login);
   const user = useAuthStore((state) => state.user);
 
+  // --- TEMP REGISTER/LOGIN HANDLERS ---
   async function handleRegister(form) {
     setLoading(true);
-    setNotification(null);
-    const data = await registerUser(form);
-    if (data.success) {
-      setCredentials({ email: form.email, password: form.password });
-      setStep("otp");
-      setNotification({ type: "success", message: "Registration successful! OTP sent to email." });
-    } else {
-      setNotification({ type: "error", message: data.msg || "Registration failed" });
-    }
+    setNotification({ type: "success", message: "Registration successful! (demo)" });
+    setCredentials({ email: form.email, password: form.password });
+    setStep("otp");
     setLoading(false);
   }
 
   async function handleVerifyOtp(e) {
     e.preventDefault();
     setLoading(true);
-    setNotification(null);
-    const data = await verifyOtp({ email: credentials.email, otp });
-    if (data.success) {
-      setStep("login");
-      setNotification({ type: "success", message: "OTP verified! Please login." });
-    } else {
-      setNotification({ type: "error", message: data.msg || "OTP verification failed" });
-    }
+    setNotification({ type: "success", message: "OTP verified! Please login. (demo)" });
+    setStep("login");
     setLoading(false);
   }
 
@@ -61,19 +75,18 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     setNotification(null);
-    const data = await loginUser(credentials);
-    console.log("Login data:", data);
-    if (data.success) {
-      console.log("Login successful:", data.user);
-      login(data.user); // updates Zustand store
-      setNotification({ type: "success", message: "Login successful!" });
-      console.log("Redirecting to dashboard...");
+    // TEMP LOGIN LOGIC
+    const found = TEMP_USERS.find(
+      u => u.email === credentials.email && u.password === credentials.password
+    );
+    if (found) {
+      login(found); // updates Zustand store
+      setNotification({ type: "success", message: "Login successful! (demo)" });
       setTimeout(() => {
         router.push("/dashboard");
       }, 1200);
-
     } else {
-      setNotification({ type: "error", message: data.msg || "Login failed" });
+      setNotification({ type: "error", message: "Invalid email or password (demo)" });
     }
     setLoading(false);
   }
@@ -150,7 +163,7 @@ export default function AuthPage() {
             <RegisterForm
               onSwitch={() => {
                 setShowLogin(true);
-                setStep("form"); // Only reset if you want to start over
+                setStep("form");
               }}
               setNotification={setNotification}
               handleRegister={handleRegister}
@@ -236,30 +249,18 @@ function LoginForm({ onSwitch, setNotification, handleLogin, loading, credential
 function RegisterForm({ onSwitch, setNotification, handleRegister, handleVerifyOtp, loading, step, setStep, credentials, setCredentials, otp, setOtp, form, setForm }) {
   // Example options (replace with API data if needed)
   const roles = ["CEO", "Manager", "Team Leader", "Employee"];
+  const [managers, setManagers] = useState([]);
+  const showManager = form.role === "Employee";
   const departments = [
     { id: "D001", name: "Executive" },
     { id: "D002", name: "Sales" },
     { id: "D003", name: "HR" },
     { id: "D004", name: "IT" },
   ];
-  const managers = [
-    { id: "E001", name: "Ananya Sharma" },
-    { id: "E002", name: "Rajiv Mehta" },
-    // ...add more managers
-  ];
 
-  // const [form, setform] = useState({
-  //   name: "",
-  //   role: "",
-  //   department_id: "",
-  //   email: "",
-  //   phone: "",
-  //   password: "",
-  //   manager_id: "",
-  // });
-
-  // Show manager_id only if role is Employee
-  const showManager = form.role === "Employee";
+  //   useEffect(() => {
+  //   setManagers().then(data => setManagers(data.managers || []));
+  // }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
